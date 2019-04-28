@@ -56,6 +56,8 @@ WHERE _index = n);
 END
 $func$  LANGUAGE plpgsql;
 
+-- SELECT rw FROM jentik_data WHERE kelurahan IS NULL;
+
 DROP TABLE IF EXISTS jentik_ci;
 CREATE TABLE jentik_ci AS
 SELECT
@@ -89,27 +91,95 @@ WHERE kelurahan != ''
 AND rw IS NOT NULL
 ORDER BY (kelurahan, rw);
 
-SELECT * FROM jentik_ci;
-
-SELECT to_char(today, 'YYYY-MM') AS date, kecamatan, rw, COUNT(*) AS forms_count
-FROM jentik_ci
-GROUP BY (kecamatan, kelurahan, rw, today)
-ORDER BY today, kecamatan, kelurahan, rw, forms_count;
+--SELECT to_char(today, 'YYYY-MM') AS date, kecamatan, rw, COUNT(*) AS forms_count
+--FROM jentik_ci
+--GROUP BY (kecamatan, kelurahan, rw, today)
+--ORDER BY today, kecamatan, kelurahan, rw, forms_count;
 
 DROP TABLE IF EXISTS jentik_hi;
 CREATE TABLE jentik_hi AS
 WITH data AS (
 	SELECT
-		kelurahan, rw,
-		SUM(number_infected_container) AS sum_infected_container,
-		SUM(number_container) AS sum_container,
-		COUNT(ogc_fid) FILTER (WHERE number_infected_container > 0) AS number_infected_house ,
+		MIN(today) AS date_start,
+		MAX(today) AS date_last,
+		kecamatan, kelurahan, rw,
+		SUM(number_infected_container) AS number_infected_container,
+		SUM(number_container) AS number_container,
+		-- avvg(container_index) AS container_index_average,
+		COUNT(ogc_fid) FILTER (WHERE number_infected_container > 0) AS number_infected_house,
 		COUNT(ogc_fid) AS number_house
 	FROM jentik_ci
-	GROUP BY (kelurahan, rw)
-	ORDER BY (kelurahan, rw)
+	GROUP BY (kecamatan, kelurahan, rw)
+	ORDER BY (kecamatan, kelurahan, rw)
 )
 SELECT *,
-	CASE WHEN number_house <> 0 THEN number_infected_house / number_house::float ELSE 0 END AS house_index
+	CASE WHEN number_house <> 0 THEN number_infected_house / number_house::float ELSE 0 END AS house_index,
+	CASE WHEN number_container <> 0 THEN number_infected_container / number_container::float ELSE 0 END AS container_index
 FROM data;
 
+SELECT * FROM jentik_hi;
+
+DROP TABLE IF EXISTS jentik_kelurahan;
+CREATE TABLE jentik_kelurahan AS
+WITH data AS (
+	SELECT
+		MIN(date_start) AS date_start, MAX(date_last) AS date_last,
+		kecamatan, kelurahan,
+		SUM(number_infected_container) AS number_infected_container,
+		SUM(number_container) AS number_container,
+		SUM(number_infected_house) AS number_infected_house,
+		SUM(number_house) AS number_house
+	FROM jentik_hi
+	GROUP BY (kecamatan, kelurahan)
+	ORDER BY (kecamatan, kelurahan)
+)
+SELECT *,
+	CASE WHEN number_house <> 0 THEN number_infected_house / number_house::float ELSE 0 END AS house_index,
+	CASE WHEN number_container <> 0 THEN number_infected_container / number_container::float ELSE 0 END AS container_index
+FROM data;
+
+SELECT * FROM jentik_kelurahan;
+
+DROP TABLE IF EXISTS jentik_kecamatan;
+CREATE TABLE jentik_kecamatan AS
+WITH data AS (
+	SELECT
+		MIN(date_start) AS date_start, MAX(date_last) AS date_last,
+		kecamatan,
+		SUM(number_infected_container) AS number_infected_container,
+		SUM(number_container) AS number_container,
+		SUM(number_infected_house) AS number_infected_house,
+		SUM(number_house) AS number_house
+	FROM jentik_kelurahan
+	GROUP BY (kecamatan)
+	ORDER BY (kecamatan)
+)
+SELECT *,
+	CASE WHEN number_house <> 0 THEN number_infected_house / number_house::float ELSE 0 END AS house_index,
+	CASE WHEN number_container <> 0 THEN number_infected_container / number_container::float ELSE 0 END AS container_index
+FROM data;
+SELECT * FROM jentik_kecamatan;
+
+DROP TABLE IF EXISTS jentik_all;
+CREATE TABLE jentik_all AS
+WITH data AS (
+	SELECT
+		MIN(date_start) AS date_start, MAX(date_last) AS date_last,
+		SUM(number_infected_container) AS number_infected_container,
+		SUM(number_container) AS number_container,
+		SUM(number_infected_house) AS number_infected_house,
+		SUM(number_house) AS number_house
+	FROM jentik_kelurahan
+)
+SELECT *,
+	CASE WHEN number_house <> 0 THEN number_infected_house / number_house::float ELSE 0 END AS house_index,
+	CASE WHEN number_container <> 0 THEN number_infected_container / number_container::float ELSE 0 END AS container_index
+FROM data;
+SELECT * FROM jentik_all;
+
+-- Results
+COPY jentik_ci TO '/tmp/jentik_ci.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
+COPY jentik_hi TO '/tmp/jentik_hi.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
+COPY jentik_kecamatan TO '/tmp/jentik_kecamatan.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
+COPY jentik_kelurahan TO '/tmp/jentik_kelurahan.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
+COPY jentik_all TO '/tmp/jentik_summary.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
