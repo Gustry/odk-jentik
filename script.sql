@@ -3,23 +3,23 @@ RETURNS integer AS
 $func$
 BEGIN
 RETURN (SELECT
-    (CASE WHEN "bak mandi ember 1" IN ('tidak ada jentik', 'punya tidak diizinkan', 'ada jentik') THEN 1 ELSE 0 END +
-    CASE WHEN "bak mandi ember 2" IN ('tidak ada jentik', 'punya tidak diizinkan', 'ada jentik') THEN 1 ELSE 0 END +
-    CASE WHEN "bak mandi ember 3" IN ('tidak ada jentik', 'punya tidak diizinkan', 'ada jentik') THEN 1 ELSE 0 END +
-    CASE WHEN "bak mandi ember 4" IN ('tidak ada jentik', 'punya tidak diizinkan', 'ada jentik') THEN 1 ELSE 0 END +
-    CASE WHEN "dispenser" IN ('tidak ada jentik', 'punya tidak diizinkan', 'ada jentik') THEN 1 ELSE 0 END +
-    CASE WHEN "tampungan air belakang kulkas" IN ('tidak ada jentik', 'punya tidak diizinkan', 'ada jentik') THEN 1 ELSE 0 END +
-    CASE WHEN "vas bunga" IN ('tidak ada jentik', 'punya tidak diizinkan', 'ada jentik') THEN 1 ELSE 0 END +
-	CASE WHEN "pot bunga air" IN ('tidak ada jentik', 'punya tidak diizinkan', 'ada jentik') THEN 1 ELSE 0 END +
-    CASE WHEN "alas pot bunga" IN ('tidak ada jentik', 'punya tidak diizinkan', 'ada jentik') THEN 1 ELSE 0 END +
-    CASE WHEN "kolam" IN ('tidak ada jentik', 'punya tidak diizinkan', 'ada jentik') THEN 1 ELSE 0 END +
-    CASE WHEN "aquarium" IN ('tidak ada jentik', 'punya tidak diizinkan', 'ada jentik') THEN 1 ELSE 0 END +
-    CASE WHEN "gentong" IN ('tidak ada jentik', 'punya tidak diizinkan', 'ada jentik') THEN 1 ELSE 0 END +
-    CASE WHEN "tempat minum hewan peliharaan" IN ('tidak ada jentik', 'punya tidak diizinkan', 'ada jentik') THEN 1 ELSE 0 END +
-    CASE WHEN "kaleng bekas" IN ('tidak ada jentik', 'punya tidak diizinkan', 'ada jentik') THEN 1 ELSE 0 END +
-    CASE WHEN "botol gelas aqua bekas" IN ('tidak ada jentik', 'punya tidak diizinkan', 'ada jentik') THEN 1 ELSE 0 END +
-    CASE WHEN "ban bekas" IN ('tidak ada jentik', 'punya tidak diizinkan', 'ada jentik') THEN 1 ELSE 0 END +
-    CASE WHEN "ketiak bunga" IN ('tidak ada jentik', 'punya tidak diizinkan', 'ada jentik') THEN 1 ELSE 0 END)
+    (CASE WHEN "bak mandi ember 1" IN ('tidak ada jentik', 'ada jentik') THEN 1 ELSE 0 END +
+    CASE WHEN "bak mandi ember 2" IN ('tidak ada jentik', 'ada jentik') THEN 1 ELSE 0 END +
+    CASE WHEN "bak mandi ember 3" IN ('tidak ada jentik', 'ada jentik') THEN 1 ELSE 0 END +
+    CASE WHEN "bak mandi ember 4" IN ('tidak ada jentik', 'ada jentik') THEN 1 ELSE 0 END +
+    CASE WHEN "dispenser" IN ('tidak ada jentik', 'ada jentik') THEN 1 ELSE 0 END +
+    CASE WHEN "tampungan air belakang kulkas" IN ('tidak ada jentik',  'ada jentik') THEN 1 ELSE 0 END +
+    CASE WHEN "vas bunga" IN ('tidak ada jentik', 'ada jentik') THEN 1 ELSE 0 END +
+	CASE WHEN "pot bunga air" IN ('tidak ada jentik', 'ada jentik') THEN 1 ELSE 0 END +
+    CASE WHEN "alas pot bunga" IN ('tidak ada jentik', 'ada jentik') THEN 1 ELSE 0 END +
+    CASE WHEN "kolam" IN ('tidak ada jentik', 'ada jentik') THEN 1 ELSE 0 END +
+    CASE WHEN "aquarium" IN ('tidak ada jentik', 'ada jentik') THEN 1 ELSE 0 END +
+    CASE WHEN "gentong" IN ('tidak ada jentik', 'ada jentik') THEN 1 ELSE 0 END +
+    CASE WHEN "tempat minum hewan peliharaan" IN ('tidak ada jentik', 'ada jentik') THEN 1 ELSE 0 END +
+    CASE WHEN "kaleng bekas" IN ('tidak ada jentik', 'ada jentik') THEN 1 ELSE 0 END +
+    CASE WHEN "botol gelas aqua bekas" IN ('tidak ada jentik', 'ada jentik') THEN 1 ELSE 0 END +
+    CASE WHEN "ban bekas" IN ('tidak ada jentik', 'ada jentik') THEN 1 ELSE 0 END +
+    CASE WHEN "ketiak bunga" IN ('tidak ada jentik', 'ada jentik') THEN 1 ELSE 0 END)
 	AS count
 FROM
     jentik_data
