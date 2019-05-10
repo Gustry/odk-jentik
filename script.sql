@@ -58,6 +58,10 @@ $func$  LANGUAGE plpgsql;
 
 -- SELECT rw FROM jentik_data WHERE kelurahan IS NULL;
 
+/*
+Container Index
+*/
+
 DROP TABLE IF EXISTS jentik_ci;
 CREATE TABLE jentik_ci AS
 SELECT
@@ -97,6 +101,12 @@ ORDER BY (kelurahan, rw);
 --GROUP BY (kecamatan, kelurahan, rw, today)
 --ORDER BY today, kecamatan, kelurahan, rw, forms_count;
 
+SELECT * FROM jentik_ci;
+
+/*
+RW
+*/
+
 DROP TABLE IF EXISTS jentik_rw;
 CREATE TABLE jentik_rw AS
 WITH data AS (
@@ -118,6 +128,10 @@ SELECT *,
 FROM data;
 
 SELECT * FROM jentik_rw;
+
+/*
+RW Monthly index
+*/
 
 DROP TABLE IF EXISTS jentik_rw_monthly;
 CREATE TABLE jentik_rw_monthly AS
@@ -142,6 +156,10 @@ FROM data;
 
 SELECT * FROM jentik_rw_monthly;
 
+/*
+Kelurahan Index
+*/
+
 DROP TABLE IF EXISTS jentik_kelurahan;
 CREATE TABLE jentik_kelurahan AS
 WITH data AS (
@@ -163,6 +181,37 @@ FROM data;
 
 SELECT * FROM jentik_kelurahan;
 
+/*
+Kelurahan index monthly
+*/
+
+DROP TABLE IF EXISTS jentik_kelurahan_monthly;
+CREATE TABLE jentik_kelurahan_monthly AS
+WITH data AS (
+	SELECT
+		month,
+		MIN(today) AS date_start,
+		MAX(today) AS date_last,
+		kecamatan, kelurahan,
+		SUM(number_infected_container) AS number_infected_container,
+		SUM(number_container) AS number_container,
+		COUNT(ogc_fid) FILTER (WHERE number_infected_container > 0) AS number_infected_house,
+		COUNT(ogc_fid) AS number_house
+	FROM jentik_ci
+	GROUP BY (month, kecamatan, kelurahan)
+	ORDER BY (month, kecamatan, kelurahan)
+)
+SELECT *,
+	CASE WHEN number_house <> 0 THEN number_infected_house / number_house::float ELSE 0 END AS house_index,
+	CASE WHEN number_container <> 0 THEN number_infected_container / number_container::float ELSE 0 END AS container_index
+FROM data;
+
+SELECT * FROM jentik_kelurahan_monthly;
+
+/*
+Kecamatan index
+*/
+
 DROP TABLE IF EXISTS jentik_kecamatan;
 CREATE TABLE jentik_kecamatan AS
 WITH data AS (
@@ -181,7 +230,39 @@ SELECT *,
 	CASE WHEN number_house <> 0 THEN number_infected_house / number_house::float ELSE 0 END AS house_index,
 	CASE WHEN number_container <> 0 THEN number_infected_container / number_container::float ELSE 0 END AS container_index
 FROM data;
+
 SELECT * FROM jentik_kecamatan;
+
+/*
+Kecamatan index monthly
+*/
+
+DROP TABLE IF EXISTS jentik_kecamatan_monthly;
+CREATE TABLE jentik_kecamatan_monthly AS
+WITH data AS (
+	SELECT
+		month,
+		MIN(today) AS date_start,
+		MAX(today) AS date_last,
+		kecamatan,
+		SUM(number_infected_container) AS number_infected_container,
+		SUM(number_container) AS number_container,
+		COUNT(ogc_fid) FILTER (WHERE number_infected_container > 0) AS number_infected_house,
+		COUNT(ogc_fid) AS number_house
+	FROM jentik_ci
+	GROUP BY (month, kecamatan)
+	ORDER BY (month, kecamatan)
+)
+SELECT *,
+	CASE WHEN number_house <> 0 THEN number_infected_house / number_house::float ELSE 0 END AS house_index,
+	CASE WHEN number_container <> 0 THEN number_infected_container / number_container::float ELSE 0 END AS container_index
+FROM data;
+
+SELECT * FROM jentik_kecamatan_monthly;
+
+/*
+Summary
+*/
 
 DROP TABLE IF EXISTS jentik_summary;
 CREATE TABLE jentik_summary AS
@@ -200,10 +281,15 @@ SELECT *,
 FROM data;
 SELECT * FROM jentik_summary;
 
--- Results
+/*
+Export to CSV
+*/
+
 COPY jentik_ci TO '/tmp/jentik_ci.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
 COPY jentik_rw TO '/tmp/jentik_rw.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
 COPY jentik_rw_monthly TO '/tmp/jentik_rw_monthly.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
 COPY jentik_kecamatan TO '/tmp/jentik_kecamatan.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
+COPY jentik_kecamatan_monthly TO '/tmp/jentik_kecamatan_monthly.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
 COPY jentik_kelurahan TO '/tmp/jentik_kelurahan.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
+COPY jentik_kecamatan_monthly TO '/tmp/jentik_kecamatan_monthly.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
 COPY jentik_summary TO '/tmp/jentik_summary.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
