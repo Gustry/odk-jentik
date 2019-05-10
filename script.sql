@@ -288,8 +288,8 @@ Export to CSV
 COPY jentik_ci TO '/tmp/jentik_ci.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
 COPY jentik_rw TO '/tmp/jentik_rw.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
 COPY jentik_rw_monthly TO '/tmp/jentik_rw_monthly.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
-COPY jentik_kecamatan TO '/tmp/jentik_kecamatan.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
-COPY jentik_kecamatan_monthly TO '/tmp/jentik_kecamatan_monthly.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
 COPY jentik_kelurahan TO '/tmp/jentik_kelurahan.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
+COPY jentik_kelurahan_monthly TO '/tmp/jentik_kelurahan_monthly.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
+COPY jentik_kecamatan TO '/tmp/jentik_kecamatan.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
 COPY jentik_kecamatan_monthly TO '/tmp/jentik_kecamatan_monthly.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
 COPY jentik_summary TO '/tmp/jentik_summary.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
