@@ -282,6 +282,32 @@ FROM data;
 SELECT * FROM jentik_summary;
 
 /*
+Summary monthly
+*/
+
+DROP TABLE IF EXISTS jentik_summary_monthly;
+CREATE TABLE jentik_summary_monthly AS
+WITH data AS (
+	SELECT
+		month,
+		MIN(today) AS date_start,
+		MAX(today) AS date_last,
+		SUM(number_infected_container) AS number_infected_container,
+		SUM(number_container) AS number_container,
+		COUNT(ogc_fid) FILTER (WHERE number_infected_container > 0) AS number_infected_house,
+		COUNT(ogc_fid) AS number_house
+	FROM jentik_ci
+	GROUP BY (month)
+	ORDER BY (month)
+)
+SELECT *,
+	CASE WHEN number_house <> 0 THEN number_infected_house / number_house::float ELSE 0 END AS house_index,
+	CASE WHEN number_container <> 0 THEN number_infected_container / number_container::float ELSE 0 END AS container_index
+FROM data;
+
+SELECT * FROM jentik_summary_monthly;
+
+/*
 Export to CSV
 */
 
@@ -293,3 +319,4 @@ COPY jentik_kelurahan_monthly TO '/tmp/jentik_kelurahan_monthly.csv' WITH (FORMA
 COPY jentik_kecamatan TO '/tmp/jentik_kecamatan.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
 COPY jentik_kecamatan_monthly TO '/tmp/jentik_kecamatan_monthly.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
 COPY jentik_summary TO '/tmp/jentik_summary.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
+COPY jentik_summary_monthly TO '/tmp/jentik_summary_monthly.csv' WITH (FORMAT CSV, DELIMITER ',', HEADER);
