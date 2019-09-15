@@ -1,3 +1,20 @@
+-- Check duplicates
+/*
+SELECT * FROM jentik_data;
+SELECT
+	COUNT(_uuid) AS count, _uuid
+FROM jentik_data
+GROUP BY _uuid
+HAVING COUNT( _uuid )> 1
+ORDER BY count DESC;
+
+DELETE
+FROM jentik_data a
+USING jentik_data b
+WHERE a._index < b._index
+AND a._uuid = b._uuid;
+*/
+
 CREATE OR REPLACE FUNCTION number_container (n INTEGER)
 RETURNS integer AS
 $func$
