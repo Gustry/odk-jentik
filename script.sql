@@ -1,5 +1,6 @@
 -- Check duplicates
 /*
+-- UUID
 SELECT * FROM jentik_data;
 SELECT
 	COUNT(_uuid) AS count, _uuid
@@ -8,12 +9,50 @@ GROUP BY _uuid
 HAVING COUNT( _uuid )> 1
 ORDER BY count DESC;
 
-DELETE
-FROM jentik_data a
-USING jentik_data b
-WHERE a._index < b._index
-AND a._uuid = b._uuid;
+-- _index
+SELECT
+	COUNT(_index) AS count, _index
+FROM jentik_data
+GROUP BY _index
+HAVING COUNT( _index )> 1
+ORDER BY count DESC;
+
+-- DELETE uuid
+DELETE FROM jentik_data a
+USING   jentik_data b
+WHERE   a.ctid < b.ctid
+AND a._uuid  = b._uuid;
+
+-- Not working
+-- DELETE
+-- FROM jentik_data a
+-- USING jentik_data b
+-- WHERE a._uuid = b._uuid
+-- AND a._index < b._index;
 */
+
+-- Recompute _index by removing and adding again
+--ALTER TABLE jentik_data DROP COLUMN _index;
+-- ALTER TABLE jentik_data ADD COLUMN _index SERIAL;
+
+-- Make the index again (not working well)
+/*
+WITH RowNbrs AS (
+    SELECT
+		_index,
+		ROW_NUMBER() OVER (ORDER BY _index) AS RowNbr
+    FROM jentik_data
+	ORDER BY start
+)
+UPDATE  jentik_data
+SET     _index = 0 +  RowNbrs.RowNbr
+FROM RowNbrs
+WHERE jentik_data._index = RowNbrs._index;
+*/
+
+SELECT * FROM jentik_data ORDER BY _index;
+
+-- End of cleaning process
 
 CREATE OR REPLACE FUNCTION number_container (n INTEGER)
 RETURNS integer AS
